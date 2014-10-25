@@ -60,8 +60,9 @@ class User(models.Model):
             'Id' : self.pk,
             'Username' : self.username,
             'Email' : self.email,
-            'Created On' : self.created_on,
-            'Last Login' : self.last_login
+            'Created On' : str(self.created_on),
+            'Last Login' : str(self.last_login),
+            'Admin' : self.is_staff,
         }
         return '<pre>' + dumps(output, sort_keys=True, indent=4, separators=(',', ': '), default=bson.json_util.object_hook) + '</pre>'
 

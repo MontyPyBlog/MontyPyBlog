@@ -1,7 +1,10 @@
 from django.http import HttpResponse
-from MontyPyBlog.models import Post
+from MontyPyBlog.models import Post, User
 from django.http import Http404
 from bson.objectid import ObjectId
+
+from bson.json_util import dumps
+import bson
 
 
 def index(request):
@@ -16,7 +19,6 @@ Handling posts
 def get_post(request, post_id):
     try:
         post = Post.objects.get(pk=post_id)
-
     except Post.DoesNotExist:
         raise Http404
     return HttpResponse(post)
@@ -26,8 +28,18 @@ def patch_post(request, post_id):
     return HttpResponse("You're looking to edit post with id %s" % post_id)
 
 
-def post_post(request):
-    return HttpResponse("You're posting a post!")
+def post_post(request, user_id):
+    if (request.POST['post-type'].lower() == 'post'):
+        gallery_files = request.POST['gallery_images']
+
+    post = Post(
+        title = request.POST['title'],
+        author = user_id,
+        content = request.POST['content'],
+        post_type = request.POST['post-type'].lower(),
+        featured_image = request.POST['featured_image'],
+        gallery_images = gallery_files,
+    )
 
 
 """
@@ -38,7 +50,11 @@ def post_user(request):
 
 
 def get_user(request, user_id):
-    return HttpResponse("You're requesting a user with id %s" % user_id)
+    try:
+        user = User.objects.get(pk=user_id)
+    except Post.DoesNotExist:
+        raise Http404
+    return HttpResponse(user)
 
 
 def patch_user(request, user_id):
