@@ -7,7 +7,7 @@ from MontyPyBlog.models import Security
 class PostAdmin(admin.ModelAdmin):
     fields = [
         'title', 'post_type', 'content',
-        'author', 'featured_image', 'gallery_images']
+        'author', 'featured_image', 'gallery_images',]
     # Can include methods here too (recently published, etc)
     list_display = (
         'title', 'post_type', 'author')
@@ -15,7 +15,7 @@ class PostAdmin(admin.ModelAdmin):
         'author', 'post_type')
     search_fields = (
         'author', 'title')
-    date_hierarchy = ('created_on')
+    # date_hierarchy = ('created_on')
 
 
 # class PostInline(admin.StackedInline):

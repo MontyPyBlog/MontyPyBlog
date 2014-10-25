@@ -1,14 +1,25 @@
 from django.http import HttpResponse
+from MontyPyBlog.models import Post
+from django.http import Http404
+from bson.objectid import ObjectId
 
 
 def index(request):
-    return HttpResponse('Hello, word. You\'re at the blog homepage')
+    posts_list = Post.objects.order_by('-created_on')[:3]
+    output = 'List of posts: <br />' + ','.join([p.pk for p in posts_list])
+    return HttpResponse(output)
+
 
 """
 Handling posts
 """
 def get_post(request, post_id):
-    return HttpResponse("You're looking for post with id %s" % post_id)
+    try:
+        post = Post.objects.get(pk=post_id)
+
+    except Post.DoesNotExist:
+        raise Http404
+    return HttpResponse(post)
 
 
 def patch_post(request, post_id):

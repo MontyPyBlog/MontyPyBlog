@@ -1,7 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from bson.objectid import ObjectId
 
+from bson.json_util import dumps
+import bson
+
+
+"""
+@TODO Create/research a proper json serializer for the api
+"""
 
 # Create your models here.
 class Post(models.Model):
@@ -24,10 +32,17 @@ class Post(models.Model):
     created_on = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        output = [
-            self.title, self.content, self.post_type,
-            self.featured_image, self.gallery_images, self.created_on]
-        return self.title
+        output = {
+            'Id' : self.pk,
+            'Title' : self.title,
+            'AuthorId' : self.author_id,
+            'Content' : self.content,
+            'Post Type' : self.post_type,
+            'Featured Image' : self.featured_image,
+            'Gallery Images' : self.gallery_images,
+            'Created On' : str(self.created_on),
+        }
+        return '<pre>' + dumps(output, sort_keys=True, indent=4, separators=(',', ': '), default=bson.json_util.object_hook) + '</pre>'
 
 
 class User(models.Model):
@@ -41,10 +56,14 @@ class User(models.Model):
     last_login = models.DateTimeField()
 
     def __unicode__(self):
-        output = [
-            self.username, self.email, self.created_on,
-            self.last_login]
-        return self.username
+        output = {
+            'Id' : self.pk,
+            'Username' : self.username,
+            'Email' : self.email,
+            'Created On' : self.created_on,
+            'Last Login' : self.last_login
+        }
+        return '<pre>' + dumps(output, sort_keys=True, indent=4, separators=(',', ': '), default=bson.json_util.object_hook) + '</pre>'
 
 
 class Security(models.Model):

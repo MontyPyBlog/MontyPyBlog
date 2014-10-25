@@ -12,22 +12,12 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_engine',
-        'NAME': 'admin',
-        'HOST' : '127.0.0.1',
-        'PORT' : '27017',
-        'USER' : 'simon',
-        'PASSWORD' : 'simon',
-    },
-
-    'api': {
-        'ENGINE': 'django_mongodb_engine',
         'NAME': 'cms_api',
         'HOST' : '127.0.0.1',
         'PORT' : '27017',
         'USER' : 'simon',
         'PASSWORD' : 'simon',
-    }
-
+    },
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -44,7 +34,7 @@ TIME_ZONE = 'America/Chicago'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = u'54486795438b4c73366199e6'
+SITE_ID = '544bf2f9438b4c5c2919c96e'
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
