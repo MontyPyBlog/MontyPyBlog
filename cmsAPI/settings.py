@@ -17,7 +17,17 @@ DATABASES = {
         'PORT' : '27017',
         'USER' : 'simon',
         'PASSWORD' : 'simon',
+    },
+
+    'api': {
+        'ENGINE': 'django_mongodb_engine',
+        'NAME': 'cms_api',
+        'HOST' : '127.0.0.1',
+        'PORT' : '27017',
+        'USER' : 'simon',
+        'PASSWORD' : 'simon',
     }
+
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -34,7 +44,7 @@ TIME_ZONE = 'America/Chicago'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
+SITE_ID = u'54486795438b4c73366199e6'
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -120,8 +130,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'MontyPyBlog',
+    'djangotoolbox',
+    'django_mongodb_engine',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
