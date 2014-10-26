@@ -3,9 +3,16 @@ from MontyPyBlog.models import Post, User
 from django.http import Http404
 from bson.objectid import ObjectId
 
+from django.shortcuts import render
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from MontyPyBlog.serializers import PostSerializer
+from rest_framework import status
+
 from bson.json_util import dumps
 import bson
 
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     posts_list = Post.objects.order_by('-created_on')[:3]
@@ -16,30 +23,44 @@ def index(request):
 """
 Handling posts
 """
+@api_view(['GET'])
 def get_post(request, post_id):
-    try:
-        post = Post.objects.get(pk=post_id)
-    except Post.DoesNotExist:
-        raise Http404
-    return HttpResponse(post)
+    if request.method == 'GET':
+        try:
+            post = Post.objects.get(pk=post_id)
+
+            serializer = PostSerializer(post)
+        except Post.DoesNotExist:
+            return HttpResponse(status=404)
+        return Response(serializer.data)
 
 
 def patch_post(request, post_id):
     return HttpResponse("You're looking to edit post with id %s" % post_id)
 
-
+@api_view(['POST'])
 def post_post(request, user_id):
-    if (request.POST['post-type'].lower() == 'post'):
-        gallery_files = request.POST['gallery_images']
+    if request.method == 'POST':
+        if (request.DATA.get('post_type').lower() == 'post'):
+            gallery_files = request.DATA.get('gallery_images')
 
-    post = Post(
-        title = request.POST['title'],
-        author = user_id,
-        content = request.POST['content'],
-        post_type = request.POST['post-type'].lower(),
-        featured_image = request.POST['featured_image'],
-        gallery_images = gallery_files,
-    )
+        user = User.objects.get(pk=user_id)
+        data = {
+            'title' : request.DATA.get('title'),
+            'author' : user.pk,
+            'content' : request.DATA.get('content'),
+            'post_type' : request.DATA.get('post_type'),
+            'featured_image' : request.DATA.get('featured_image'),
+            'gallery_images' : gallery_files,
+        }
+
+        serializer = PostSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_created)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return 'Method not allowed'
 
 
 """

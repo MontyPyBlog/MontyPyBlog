@@ -22,7 +22,7 @@ class Post(models.Model):
         (GALLERY, 'Gallery'),
     )
     post_type = models.CharField(max_length=7, choices=POST_TYPES)
-    author = models.ForeignKey(User, blank=True, null=True)
+    author = models.ForeignKey(User)
     featured_image = models.SlugField(
         'S3 Bucket slug for featured image',
         max_length=255)
@@ -42,7 +42,8 @@ class Post(models.Model):
             'Gallery Images' : self.gallery_images,
             'Created On' : str(self.created_on),
         }
-        return '<pre>' + dumps(output, sort_keys=True, indent=4, separators=(',', ': '), default=bson.json_util.object_hook) + '</pre>'
+        # return '<pre>' + dumps(output, sort_keys=True, indent=4, separators=(',', ': '), default=bson.json_util.object_hook) + '</pre>'
+        return self.pk       
 
 
 class User(models.Model):
@@ -64,7 +65,7 @@ class User(models.Model):
             'Last Login' : str(self.last_login),
             'Admin' : self.is_staff,
         }
-        return '<pre>' + dumps(output, sort_keys=True, indent=4, separators=(',', ': '), default=bson.json_util.object_hook) + '</pre>'
+        return self.pk
 
 
 class Security(models.Model):

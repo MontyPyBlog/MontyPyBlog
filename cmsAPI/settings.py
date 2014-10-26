@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'MontyPyBlog',
     'djangotoolbox',
     'django_mongodb_engine',
+    'rest_framework',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
