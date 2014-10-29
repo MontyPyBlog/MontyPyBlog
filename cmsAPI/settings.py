@@ -113,6 +113,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'django.core.management',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
