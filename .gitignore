@@ -53,5 +53,9 @@ docs/_build/
 # PyBuilder
 target/
 
+# App Specific
+cmsAPI/appinfo.py
+cmsAPI/appinfo.pyc
+
 #IDE
 .idea/
