@@ -22,13 +22,14 @@ class Post(models.Model):
         (GALLERY, 'Gallery'),
     )
     post_type = models.CharField(max_length=7, choices=POST_TYPES)
-    author = models.ForeignKey(User)
+    author = models.CharField(max_length=80, blank=True, null=True)
     featured_image = models.SlugField(
         'S3 Bucket slug for featured image',
         max_length=255)
     gallery_images = models.SlugField(
         'S3 Bucket slugs for gallery images',
-        max_length=255)
+        max_length=255,
+        blank=True)
     created_on = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
@@ -54,7 +55,7 @@ class User(models.Model):
     # Django fields for users:
     is_staff = models.BooleanField()
     is_active = models.BooleanField()
-    last_login = models.DateTimeField()
+    last_login = models.DateTimeField(blank=True, null=True)
 
     def __unicode__(self):
         output = {

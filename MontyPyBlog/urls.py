@@ -13,7 +13,9 @@ urlpatterns = patterns(
     # Ex: /cms/post/create/
     url(r'^post/create/(?P<user_id>\w+)/$', views.post_post, name='postPost'),
     # Ex: /cms/user/7/
-    url(r'^user/(?P<user_id>\w+)/$', views.get_user, name='getUser'),
+    url(r'^user/post/(?P<user_id>\w+)/$', views.get_user, name='getUser'),
+    # Ex: /cms/user/create/
+    url(r'^user/create/$', views.post_user, name='postUser'),
     # Ex: /cms/user/patch/7/
     url(r'^user/patch/(?P<user_id>\w+)/$', views.patch_user, name='patchPost'),
     # Ex: /cms/user/login/7/
