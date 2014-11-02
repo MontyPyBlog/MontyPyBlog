@@ -1,3 +1,4 @@
+import appinfo
 # Django settings for cmsAPI project.
 
 DEBUG = True

@@ -12,6 +12,8 @@ urlpatterns = patterns(
     url(r'^patch/post/$', views.patch_post, name='patchPost'),
     # Ex: /cms/post/create/
     url(r'^post/create/$', views.post_post, name='postPost'),
+    # Ex: /cms/post/upload/
+    url(r'^post/upload/$', views.post_files, name='postFiles'),
     # Ex: /cms/user/7/
     url(r'^user/$', views.get_user, name='getUser'),
     # Ex: /cms/user/create/

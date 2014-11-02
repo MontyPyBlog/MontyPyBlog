@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from MontyPyBlog.serializers import PostSerializer, UserSerializer
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
+import os
+from boto.s3.connection import S3Connection
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -108,6 +110,11 @@ def patch_post(request):
 @parser_classes((MultiPartParser, FormParser))
 def post_files(request):
     if request.method == 'POST':
+        # Secret and key are set in environment variables
+        s3 = boto.S3Connection()
+
+        bucket = os.environ['S3_BUCKET']
+
         if request.DATA.get('file_upload_type') == 'featured_image':
             pass
 
@@ -116,6 +123,8 @@ def post_files(request):
 
         else:
             pass
+
+        return Response(bucket, status=status.HTTP_201_CREATED)
 
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
