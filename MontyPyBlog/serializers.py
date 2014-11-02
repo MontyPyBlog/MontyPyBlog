@@ -3,7 +3,7 @@ from MontyPyBlog.models import Post, User
 
 class PostSerializer(serializers.ModelSerializer):
     pk = serializers.Field()
-    
+
     class Meta:
         model = Post
         fields = (
@@ -17,6 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            '_id', 'username', 'email',
-            'is_staff', 'created_on', 'last_login',
-            'gallery_images', 'created_on')
+            'pk', 'username', 'email',
+            'is_staff', 'created_on', 'last_login'
+        )
