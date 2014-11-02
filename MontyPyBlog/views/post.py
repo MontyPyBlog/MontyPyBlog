@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 import os
 from boto.s3.connection import S3Connection
+from boto.s3.key import Key
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -111,12 +112,37 @@ def patch_post(request):
 def post_files(request):
     if request.method == 'POST':
         # Secret and key are set in environment variables
-        s3 = boto.S3Connection()
+        s3 = S3Connection()
 
-        bucket = os.environ['S3_BUCKET']
+        bucket_name = os.environ['S3_BUCKET']
+
+        bucket = s3.get_bucket(bucket_name)
+
+        key_object = Key(bucket)
+
+        post = Post.objects.get(pk=request.DATA.get('post_id'))
+
+        s3_folder_name = 'MontyPyBlog/'
 
         if request.DATA.get('file_upload_type') == 'featured_image':
-            pass
+            key_object.key = s3_folder_name + request.FILES['featured_image'].name
+            key_object.set_contents_from_file(request.FILES['featured_image'])
+            key_object.make_public()
+
+            image_url = key_object.generate_url(expires_in=0)
+
+            data = {
+                'featured_image': request.FILES['featured_image'].name,
+                'post_id': post.pk,
+                'image_url': image_url,
+            }
+
+            serializer = PostSerializer(post, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Else keep going and return 405
 
         elif request.DATA.get('file_upload_type') == 'gallery_images':
             pass

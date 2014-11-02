@@ -24,7 +24,7 @@ class Post(models.Model):
     )
     post_type = models.CharField(max_length=7, choices=POST_TYPES)
     author = models.CharField(max_length=80, blank=True, null=True)
-    featured_image = models.SlugField(
+    featured_image = models.CharField(
         'S3 Bucket slug for featured image',
         max_length=255)
     gallery_images = models.CharField(
