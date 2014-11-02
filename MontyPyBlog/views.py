@@ -1,22 +1,28 @@
 from django.http import HttpResponse
 from MontyPyBlog.models import Post, User
 from django.http import Http404
-from bson.objectid import ObjectId
 
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from MontyPyBlog.serializers import PostSerializer, UserSerializer
 from rest_framework import status
 
-from bson.json_util import dumps
-import bson
-
 from django.views.decorators.csrf import csrf_exempt
+
+"""
+@TODO:
+- Uploading files
+- Sending uploaded files to an S3 bucket
+- Getting the uploaded file slug(s)
+- Site info in db (base url, base media url, etc)
+"""
+
+
 
 def index(request):
     posts_list = Post.objects.order_by('-created_on')[:3]
     output = 'List of posts: <br />' + ','.join([p.pk for p in posts_list])
+
     return HttpResponse(output)
 
 
@@ -31,21 +37,14 @@ def get_post(request, post_id):
 
             serializer = PostSerializer(post)
         except Post.DoesNotExist:
-            return HttpResponse(status=404)
+            return Http404
+
         return Response(serializer.data)
 
 
-def patch_post(request, post_id):
-    return HttpResponse("You're looking to edit post with id %s" % post_id)
-
 @api_view(['POST'])
-def post_post(request, user_id):
+def post_post(request):
     if request.method == 'POST':
-        if (request.DATA.get('post_type').lower() == 'gallery'):
-            gallery_files = request.DATA.get('gallery_images')
-        else:
-            gallery_files = ''
-
         user = User.objects.get(pk=request.DATA.get('author'))
         data = {
             'title' : request.DATA.get('title'),
@@ -57,10 +56,49 @@ def post_post(request, user_id):
         }
 
         serializer = PostSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    else:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['PATCH'])
+def patch_post(request):
+    if request.method == 'PATCH':
+        try:
+            postId = request.DATA.get('postId')
+            post = Post.objects.get(pk=postId)
+
+        except Post.DoesNotExist:
+            return Http404
+
+        userId = request.DATA.get('author')
+        user = User.objects.get(pk=userId)
+
+        data = {
+            'title' : request.DATA.get('title'),
+            'author' : user.pk,
+            'content' : request.DATA.get('content'),
+            'post_type' : request.DATA.get('post_type'),
+            'featured_image' : request.DATA.get('featured_image'),
+            'gallery_images' : request.DATA.get('gallery_images')
+        }
+
+        serializer = PostSerializer(post, data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -76,33 +114,65 @@ def post_user(request):
             'email' : request.DATA.get('email'),
             'password' : request.DATA.get('password'),
         }
+
         serializer = UserSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 @api_view(['GET'])
 def get_user(request, user_id):
-    try:
-        user = User.objects.get(pk=user_id)
+    if request.method == 'GET':
+        try:
+            user = User.objects.get(pk=user_id)
 
-        data= {
-            'pk' : user.pk,
-            'username' : user.username
+            data= {
+                'pk' : user.pk,
+                'username' : user.username
+            }
+        except User.DoesNotExist:
+            raise Http404
+
+        serializer = UserSerializer(data=data)
+
+        return Response(user.email)
+
+    else:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['PATCH'])
+def patch_user(request):
+    if request.method == 'PATCH':
+        try:
+            userId = request.DATA.get('userId')
+            user = User.objects.get(pk=userId)
+        except User.DoesNotExist:
+            raise Http404
+
+        data = {
+            'username' : request.DATA.get('username'),
+            'email' : request.DATA.get('email'),
+            'password' : request.DATA.get('password'),
         }
-    except User.DoesNotExist:
-        raise Http404
-        
-    serializer = UserSerializer(data=data)
-    return Response(user.email)
 
+        serializer = UserSerializer(user, data=data)
 
-def patch_user(request, user_id):
-    return HttpResponse("You're requesting to edit a user with id %s" % user_id)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    else:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def post_login(request, user_id):

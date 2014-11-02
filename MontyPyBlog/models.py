@@ -29,7 +29,8 @@ class Post(models.Model):
     gallery_images = models.SlugField(
         'S3 Bucket slugs for gallery images',
         max_length=255,
-        blank=True)
+        blank=True,
+        null=True)
     created_on = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
