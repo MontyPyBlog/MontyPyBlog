@@ -11,6 +11,7 @@ import bson
 @TODO Create/research a proper json serializer for the api
 """
 
+
 # Create your models here.
 class Post(models.Model):
     title = models.CharField(max_length=255)
@@ -23,10 +24,10 @@ class Post(models.Model):
     )
     post_type = models.CharField(max_length=7, choices=POST_TYPES)
     author = models.CharField(max_length=80, blank=True, null=True)
-    featured_image = models.SlugField(
+    featured_image = models.CharField(
         'S3 Bucket slug for featured image',
         max_length=255)
-    gallery_images = models.SlugField(
+    gallery_images = models.TextField(
         'S3 Bucket slugs for gallery images',
         max_length=255,
         blank=True,
