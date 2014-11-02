@@ -90,7 +90,7 @@ def patch_post(request):
             'gallery_images' : request.DATA.get('gallery_images')
         }
 
-        serializer = PostSerializer(post, data=data)
+        serializer = PostSerializer(post, data=data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -163,7 +163,7 @@ def patch_user(request):
             'password' : request.DATA.get('password'),
         }
 
-        serializer = UserSerializer(user, data=data)
+        serializer = UserSerializer(user, data=data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
