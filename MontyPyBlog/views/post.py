@@ -10,6 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 import os
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
+import threading, Queue
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -107,13 +108,15 @@ def patch_post(request):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+# TODO: Add checks for file type
+# Can probably be rewritten more DRY-ly
 @api_view(['POST'])
 @parser_classes((MultiPartParser, FormParser))
 def post_files(request):
     if request.method == 'POST':
         # Secret and key are set in environment variables
         s3 = S3Connection()
-        bucket_name = os.environ['S3_BUCKET']
+        bucket_name = os.environ['S3_BUCKET_NAME']
         bucket = s3.get_bucket(bucket_name)
         key_object = Key(bucket)
 
@@ -128,6 +131,7 @@ def post_files(request):
             key_object.make_public()
 
             # Can optionally handle creating URLs to files elsewhere since S3 bucket location is static
+            # Setting query_auth=False disables urls with signatures
             image_url = key_object.generate_url(expires_in=0, query_auth=False)
 
             data = {
@@ -135,20 +139,46 @@ def post_files(request):
                 'post_id': post.pk,
             }
 
-            serializer = PostSerializer(post, data=data, partial=True)
-
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            # Else keep going and return 405
-
         elif request.DATA.get('file_upload_type') == 'gallery_images':
-            pass
+
+            def upload(file):
+
+                # Boto connections aren't thread safe
+                s3 = S3Connection()
+                bucket_name = os.environ['S3_BUCKET_NAME']
+                bucket = s3.get_bucket(bucket_name)
+                key_object = Key(bucket)
+
+                key_object.key = s3_folder_name + file.name
+                key_object.set_contents_from_file(file)
+                key_object.make_public()
+
+                image_url = key_object.generate_url(expires_in=0, query_auth=False)
+
+                return image_url
+
+            # Research how to get return values for threads
+            file_urls = []
+            for filename, file in request.FILES.iteritems():
+                t = threading.Thread(target=upload, args=(file,)).start()
+                file_urls.append(os.environ['S3_BUCKET_LOCATION'] + file.name)
+
+            data = {
+                'gallery_images': ','.join(file_urls),
+                'post_id': post.pk,
+            }
 
         else:
-            pass
+            return Response('No files have been uploaded', status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(bucket, status=status.HTTP_201_CREATED)
+        serializer = PostSerializer(post, data=data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Else keep going and return 405
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     else:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)

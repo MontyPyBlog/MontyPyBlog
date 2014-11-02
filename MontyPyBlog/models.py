@@ -27,7 +27,7 @@ class Post(models.Model):
     featured_image = models.CharField(
         'S3 Bucket slug for featured image',
         max_length=255)
-    gallery_images = models.CharField(
+    gallery_images = models.TextField(
         'S3 Bucket slugs for gallery images',
         max_length=255,
         blank=True,
