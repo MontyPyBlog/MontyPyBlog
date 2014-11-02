@@ -10,7 +10,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 import os
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-import threading, Queue
+import threading
+import imghdr
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -108,7 +109,6 @@ def patch_post(request):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-# TODO Add checks for file type
 # TODO Add unique file names
 # Can probably be rewritten more DRY-ly
 @api_view(['POST'])
@@ -126,7 +126,12 @@ def post_files(request):
         elif request.DATA.get('file_upload_type') == 'featured_image':
             file_upload_type = 'featured_image'
 
+        accepted_file_types = ['jpeg', 'gif', 'png']
+
         def upload(file):
+            if imghdr.what(file) not in accepted_file_types:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
             # Boto connections aren't thread safe
             # Secret and key are set in environment variables
             s3 = S3Connection()
@@ -158,7 +163,7 @@ def post_files(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-            # Else keep going and return 405
+        # Else keep going and return 405
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
