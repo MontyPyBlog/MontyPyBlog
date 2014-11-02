@@ -17,9 +17,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 """
 @TODO:
-- Uploading files
-- Sending uploaded files to an S3 bucket
-- Getting the uploaded file slug(s)
 - Site info in db (base url, base media url, etc)
 """
 
