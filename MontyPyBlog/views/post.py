@@ -113,15 +113,13 @@ def post_files(request):
     if request.method == 'POST':
         # Secret and key are set in environment variables
         s3 = S3Connection()
-
         bucket_name = os.environ['S3_BUCKET']
-
         bucket = s3.get_bucket(bucket_name)
-
         key_object = Key(bucket)
 
         post = Post.objects.get(pk=request.DATA.get('post_id'))
 
+        # To prepend folder name
         s3_folder_name = 'MontyPyBlog/'
 
         if request.DATA.get('file_upload_type') == 'featured_image':
@@ -129,12 +127,12 @@ def post_files(request):
             key_object.set_contents_from_file(request.FILES['featured_image'])
             key_object.make_public()
 
-            image_url = key_object.generate_url(expires_in=0)
+            # Can optionally handle creating URLs to files elsewhere since S3 bucket location is static
+            image_url = key_object.generate_url(expires_in=0, query_auth=False)
 
             data = {
-                'featured_image': request.FILES['featured_image'].name,
+                'featured_image': image_url,
                 'post_id': post.pk,
-                'image_url': image_url,
             }
 
             serializer = PostSerializer(post, data=data, partial=True)
