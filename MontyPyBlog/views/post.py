@@ -108,68 +108,50 @@ def patch_post(request):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-# TODO: Add checks for file type
+# TODO Add checks for file type
+# TODO Add unique file names
 # Can probably be rewritten more DRY-ly
 @api_view(['POST'])
 @parser_classes((MultiPartParser, FormParser))
 def post_files(request):
     if request.method == 'POST':
-        # Secret and key are set in environment variables
-        s3 = S3Connection()
-        bucket_name = os.environ['S3_BUCKET_NAME']
-        bucket = s3.get_bucket(bucket_name)
-        key_object = Key(bucket)
 
         post = Post.objects.get(pk=request.DATA.get('post_id'))
 
         # To prepend folder name
         s3_folder_name = 'MontyPyBlog/'
 
-        if request.DATA.get('file_upload_type') == 'featured_image':
-            key_object.key = s3_folder_name + request.FILES['featured_image'].name
-            key_object.set_contents_from_file(request.FILES['featured_image'])
+        if (request.DATA.get('file_upload_type') == 'gallery_images') or (len(request.FILES) > 1):
+            file_upload_type = 'gallery_images'
+        elif request.DATA.get('file_upload_type') == 'featured_image':
+            file_upload_type = 'featured_image'
+
+        def upload(file):
+            # Boto connections aren't thread safe
+            # Secret and key are set in environment variables
+            s3 = S3Connection()
+            bucket_name = os.environ['S3_BUCKET_NAME']
+            bucket = s3.get_bucket(bucket_name)
+            key_object = Key(bucket)
+
+            key_object.key = s3_folder_name + file.name
+            key_object.set_contents_from_file(file)
             key_object.make_public()
 
-            # Can optionally handle creating URLs to files elsewhere since S3 bucket location is static
-            # Setting query_auth=False disables urls with signatures
             image_url = key_object.generate_url(expires_in=0, query_auth=False)
 
-            data = {
-                'featured_image': image_url,
-                'post_id': post.pk,
-            }
+            return image_url
 
-        elif request.DATA.get('file_upload_type') == 'gallery_images':
+        # Research how to get return values for threads
+        file_urls = []
+        for filename, file in request.FILES.iteritems():
+            t = threading.Thread(target=upload, args=(file,)).start()
+            file_urls.append(os.environ['S3_BUCKET_LOCATION'] + file.name)
 
-            def upload(file):
-
-                # Boto connections aren't thread safe
-                s3 = S3Connection()
-                bucket_name = os.environ['S3_BUCKET_NAME']
-                bucket = s3.get_bucket(bucket_name)
-                key_object = Key(bucket)
-
-                key_object.key = s3_folder_name + file.name
-                key_object.set_contents_from_file(file)
-                key_object.make_public()
-
-                image_url = key_object.generate_url(expires_in=0, query_auth=False)
-
-                return image_url
-
-            # Research how to get return values for threads
-            file_urls = []
-            for filename, file in request.FILES.iteritems():
-                t = threading.Thread(target=upload, args=(file,)).start()
-                file_urls.append(os.environ['S3_BUCKET_LOCATION'] + file.name)
-
-            data = {
-                'gallery_images': ','.join(file_urls),
-                'post_id': post.pk,
-            }
-
-        else:
-            return Response('No files have been uploaded', status=status.HTTP_400_BAD_REQUEST)
+        data = {
+            file_upload_type: ','.join(file_urls),
+            'post_id': post.pk,
+        }
 
         serializer = PostSerializer(post, data=data, partial=True)
 
