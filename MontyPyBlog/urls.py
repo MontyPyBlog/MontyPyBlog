@@ -7,13 +7,13 @@ urlpatterns = patterns(
     # Ex: /cms/
     url(r'^$', views.index, name='index'),
     # Ex: /cms/post/7/
-    url(r'^post/(?P<post_id>\w+)/$', views.get_post, name='getPost'),
+    url(r'^post/$', views.get_post, name='getPost'),
     # Ex: /cms/post/patch/7/
     url(r'^patch/post/$', views.patch_post, name='patchPost'),
     # Ex: /cms/post/create/
     url(r'^post/create/$', views.post_post, name='postPost'),
     # Ex: /cms/user/7/
-    url(r'^user/post/(?P<user_id>\w+)/$', views.get_user, name='getUser'),
+    url(r'^user/$', views.get_user, name='getUser'),
     # Ex: /cms/user/create/
     url(r'^user/create/$', views.post_user, name='postUser'),
     # Ex: /cms/user/patch/7/
