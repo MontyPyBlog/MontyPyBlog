@@ -1,7 +1,6 @@
 from django.contrib import admin
 from MontyPyBlog.models import Post
 from MontyPyBlog.models import User
-from MontyPyBlog.models import Security
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -10,11 +9,14 @@ class PostAdmin(admin.ModelAdmin):
         'author', 'featured_image', 'gallery_images',]
     # Can include methods here too (recently published, etc)
     list_display = (
-        'title', 'post_type', 'author')
-    list_filter = (
-        'author', 'post_type')
+        'title', 'post_type', 'author'
+    )
+    list_filter = [
+        'post_type',
+    ]
     search_fields = (
-        'author', 'title')
+        'author', 'title'
+    )
     # date_hierarchy = ('created_on')
 
 
@@ -28,4 +30,3 @@ class PostAdmin(admin.ModelAdmin):
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(User)
-admin.site.register(Security)

@@ -7,11 +7,6 @@ from bson.json_util import dumps
 import bson
 
 
-"""
-@TODO Create/research a proper json serializer for the api
-"""
-
-
 # Create your models here.
 class Post(models.Model):
     title = models.CharField(max_length=255)
@@ -69,8 +64,3 @@ class User(models.Model):
             'Admin' : self.is_staff,
         }
         return self.pk
-
-
-class Security(models.Model):
-    # Oauth implementation
-    pass

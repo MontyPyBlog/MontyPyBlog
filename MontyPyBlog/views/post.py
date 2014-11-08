@@ -1,8 +1,8 @@
 from django.http import HttpResponse
 from MontyPyBlog.models import Post, User
-from django.http import Http404
+import time
 
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, authentication_classes, permission_classes
 from rest_framework.response import Response
 from MontyPyBlog.serializers import PostSerializer, UserSerializer
 from rest_framework import status
@@ -13,7 +13,6 @@ from boto.s3.key import Key
 import threading
 import imghdr
 
-from django.views.decorators.csrf import csrf_exempt
 
 """
 @TODO:
@@ -34,6 +33,9 @@ Handling posts
 @api_view(['GET'])
 def get_post(request):
     if request.method == 'GET':
+        if request.auth is None:
+            return Response('Not Authenticated', status=status.HTTP_403_FORBIDDEN)
+
         try:
             post_id = request.DATA.get('post_id')
             post = Post.objects.get(pk=post_id)
@@ -48,6 +50,9 @@ def get_post(request):
 @api_view(['POST'])
 def post_post(request):
     if request.method == 'POST':
+        if request.auth is None:
+            return Response('Not Authenticated', status=status.HTTP_403_FORBIDDEN)
+
         user = User.objects.get(pk=request.DATA.get('author'))
         data = {
             'title': request.DATA.get('title'),
@@ -74,12 +79,15 @@ def post_post(request):
 @api_view(['PATCH'])
 def patch_post(request):
     if request.method == 'PATCH':
+        if request.auth is None:
+            return Response('Not Authenticated', status=status.HTTP_403_FORBIDDEN)
+
         try:
             post_id = request.DATA.get('post_id')
             post = Post.objects.get(pk=post_id)
 
         except Post.DoesNotExist:
-            return Http404
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         user_id = request.DATA.get('author')
         user = User.objects.get(pk=user_id)
@@ -112,6 +120,8 @@ def patch_post(request):
 @parser_classes((MultiPartParser, FormParser))
 def post_files(request):
     if request.method == 'POST':
+        if request.auth is None:
+            return Response('Not Authenticated', status=status.HTTP_403_FORBIDDEN)
 
         post = Post.objects.get(pk=request.DATA.get('post_id'))
 

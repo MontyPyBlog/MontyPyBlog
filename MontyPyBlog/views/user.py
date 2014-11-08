@@ -15,6 +15,9 @@ Handling Users
 @api_view(['POST'])
 def post_user(request):
     if request.method == 'POST':
+        if request.auth is None:
+            return Response('Not Authenticated', status=status.HTTP_403_FORBIDDEN)
+
         data = {
             'username': request.DATA.get('username'),
             'email': request.DATA.get('email'),
@@ -36,6 +39,9 @@ def post_user(request):
 @api_view(['GET'])
 def get_user(request):
     if request.method == 'GET':
+        if request.auth is None:
+            return Response('Not Authenticated', status=status.HTTP_403_FORBIDDEN)
+
         try:
             user_id = request.DATA.get('user_id')
             user = User.objects.get(pk=user_id)
@@ -59,6 +65,9 @@ def get_user(request):
 @api_view(['PATCH'])
 def patch_user(request):
     if request.method == 'PATCH':
+        if request.auth is None:
+            return Response('Not Authenticated', status=status.HTTP_403_FORBIDDEN)
+
         try:
             user_id = request.DATA.get('user_id')
             user = User.objects.get(pk=user_id)
