@@ -17,4 +17,6 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
     # Points urlconf to the api.urls, which will then handle our urls
     url(r'^cms/', include('MontyPyBlog.urls')),
+    # OAuth2
+    url(r'^oauth2/', include('provider.oauth2.urls', namespace='oauth2')),
 )

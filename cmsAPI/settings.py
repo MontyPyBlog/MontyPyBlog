@@ -126,7 +126,7 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
         'google.com',
         'hostname.example.com',
-    )
+)
 
 
 INSTALLED_APPS = (
@@ -141,11 +141,21 @@ INSTALLED_APPS = (
     'django_mongodb_engine',
     'rest_framework',
     'corsheaders',
+    'provider',
+    'provider.oauth2',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.OAuth2Authentication',
+    )
+}
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
