@@ -135,7 +135,7 @@ def post_files(request):
 
         accepted_file_types = ['jpeg', 'gif', 'png']
 
-        def upload(file):
+        def upload(file, key_name):
             if imghdr.what(file) not in accepted_file_types:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -146,7 +146,7 @@ def post_files(request):
             bucket = s3.get_bucket(bucket_name)
             key_object = Key(bucket)
 
-            key_object.key = s3_folder_name + file.name
+            key_object.key = s3_folder_name + key_name
             key_object.set_contents_from_file(file)
             key_object.make_public()
 
@@ -154,11 +154,13 @@ def post_files(request):
 
             return image_url
 
+        # Bottleneck will be connecting to S3, so we thread
         # Research how to get return values for threads
         file_urls = []
         for filename, file in request.FILES.iteritems():
-            t = threading.Thread(target=upload, args=(file,)).start()
-            file_urls.append(os.environ['S3_BUCKET_LOCATION'] + file.name)
+            key_name = str(time.time()) + '-' + file.name
+            t = threading.Thread(target=upload, args=(file, key_name)).start()
+            file_urls.append(os.environ['S3_BUCKET_LOCATION'] + key_name)
 
         data = {
             file_upload_type: ','.join(file_urls),
