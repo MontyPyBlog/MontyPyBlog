@@ -58,6 +58,9 @@ cmsAPI/appinfo.py
 cmsAPI/appinfo.pyc
 cmsAPI/settings.py
 cmsAPI/settings.pyc
+admin/
+rest_framework/
+static/
 
 #IDE
 .idea/
