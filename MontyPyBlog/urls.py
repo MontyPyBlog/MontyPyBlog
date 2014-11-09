@@ -24,4 +24,6 @@ urlpatterns = patterns(
     url(r'^user/login/(?P<user_id>\w+)/$', views.post_login, name='postLogin'),
     # Ex: /cms/user/logout/7/
     url(r'^user/logout/(?P<user_id>\w+)/$', views.post_logout, name='postLogout'),
+    # Ex: /cms/csrf/token/
+    url(r'^csrf/token/$', views.get_csrf, name='getToken'),
 )

@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from MontyPyBlog.models import Post, User
 import time
+import django.middleware.csrf
 
 from rest_framework.decorators import api_view, parser_classes, authentication_classes, permission_classes
 from rest_framework.response import Response
@@ -45,6 +46,15 @@ def get_post(request):
             return Http404
 
         return Response(serializer.data)
+
+
+# For dev
+@api_view(['GET'])
+def get_csrf(request):
+    if request.method == 'GET':
+        return Response(django.middleware.csrf.get_token(request))
+    else:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 @api_view(['POST'])
